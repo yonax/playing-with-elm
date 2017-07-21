@@ -2,6 +2,7 @@ module Main exposing (..)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Html.Events exposing (onClick)
 import Components.Counter as Counter
 
 
@@ -14,16 +15,22 @@ main =
 -- MODEL
 
 
+type alias CounterWithId =
+    { id : Int
+    , counter : Counter.Model
+    }
+
+
 type alias Model =
-    { counter : Counter.Model
-    , secondCounter : Counter.Model
+    { counters : List CounterWithId
+    , nextId : Int
     }
 
 
 model : Model
 model =
-    { counter = Counter.init 0
-    , secondCounter = Counter.init 100
+    { counters = [ CounterWithId 0 <| Counter.init 0 ]
+    , nextId = 1
     }
 
 
@@ -33,8 +40,8 @@ model =
 
 type Msg
     = NoOp
-    | CounterMsg Counter.Msg
-    | SecondCounterMsg Counter.Msg
+    | AddCounter
+    | CounterMsg Int Counter.Msg
 
 
 update : Msg -> Model -> Model
@@ -43,11 +50,21 @@ update msg model =
         NoOp ->
             model
 
-        CounterMsg msg ->
-            { model | counter = Counter.update msg model.counter }
+        AddCounter ->
+            { model
+                | counters = (CounterWithId model.nextId <| Counter.init 0) :: model.counters
+                , nextId = model.nextId + 1
+            }
 
-        SecondCounterMsg msg ->
-            { model | secondCounter = Counter.update msg model.secondCounter }
+        CounterMsg counterId msg ->
+            let
+                update counter =
+                    if counter.id == counterId then
+                        { counter | counter = Counter.update msg counter.counter }
+                    else
+                        counter
+            in
+                { model | counters = List.map update model.counters }
 
 
 
@@ -59,7 +76,14 @@ view model =
     div [ class "main container is-fluid" ]
         [ div
             [ class "block" ]
-            [ Counter.view model.counter |> Html.map CounterMsg
-            , Counter.view model.secondCounter |> Html.map SecondCounterMsg
-            ]
+            (List.concat
+                [ [ a [ class "button is-primary", onClick AddCounter ] [ text "add counter" ] ]
+                , (List.map
+                    (\counter ->
+                        Counter.view counter.counter |> Html.map (CounterMsg counter.id)
+                    )
+                    model.counters
+                  )
+                ]
+            )
         ]
