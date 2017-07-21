@@ -8,6 +8,7 @@ import Html.Events exposing (onClick)
 type alias Model =
     Int
 
+init : Int -> Model
 init n = n
 
 -- UPDATE

@@ -16,12 +16,15 @@ main =
 
 type alias Model =
     { counter : Counter.Model
+    , secondCounter : Counter.Model
     }
 
 
 model : Model
 model =
-    { counter = Counter.init 0 }
+    { counter = Counter.init 0
+    , secondCounter = Counter.init 100
+    }
 
 
 
@@ -30,7 +33,8 @@ model =
 
 type Msg
     = NoOp
-    | CounterMessage Counter.Msg
+    | CounterMsg Counter.Msg
+    | SecondCounterMsg Counter.Msg
 
 
 update : Msg -> Model -> Model
@@ -39,8 +43,11 @@ update msg model =
         NoOp ->
             model
 
-        CounterMessage msg ->
+        CounterMsg msg ->
             { model | counter = Counter.update msg model.counter }
+
+        SecondCounterMsg msg ->
+            { model | secondCounter = Counter.update msg model.secondCounter }
 
 
 
@@ -52,5 +59,7 @@ view model =
     div [ class "main container is-fluid" ]
         [ div
             [ class "block" ]
-            [ Counter.view model.counter |> Html.map CounterMessage ]
+            [ Counter.view model.counter |> Html.map CounterMsg
+            , Counter.view model.secondCounter |> Html.map SecondCounterMsg
+            ]
         ]
