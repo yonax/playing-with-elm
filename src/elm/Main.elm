@@ -2,11 +2,10 @@ module Main exposing (..)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Html.Events exposing (onClick)
-import Components.Hello exposing (hello)
+import Components.Counter as Counter
 
 
-main : Program Never Int Msg
+main : Program Never Model Msg
 main =
     Html.beginnerProgram { model = model, view = view, update = update }
 
@@ -16,12 +15,13 @@ main =
 
 
 type alias Model =
-    Int
+    { counter : Counter.Model
+    }
 
 
-model : number
+model : Model
 model =
-    0
+    { counter = Counter.init 0 }
 
 
 
@@ -30,8 +30,7 @@ model =
 
 type Msg
     = NoOp
-    | Increment
-    | Decrement
+    | CounterMessage Counter.Msg
 
 
 update : Msg -> Model -> Model
@@ -40,11 +39,8 @@ update msg model =
         NoOp ->
             model
 
-        Increment ->
-            model + 1
-
-        Decrement ->
-            model - 1
+        CounterMessage msg ->
+            { model | counter = Counter.update msg model.counter }
 
 
 
@@ -56,8 +52,5 @@ view model =
     div [ class "main container is-fluid" ]
         [ div
             [ class "block" ]
-            [ a [ class "button", onClick Decrement ] [ text "-" ]
-            , span [ class "tag is-primary is-medium" ] [ text <| toString model ]
-            , a [ class "button", onClick Increment ] [ text "+" ]
-            ]
+            [ Counter.view model.counter |> Html.map CounterMessage ]
         ]
