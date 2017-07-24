@@ -73,17 +73,14 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
-    div [ class "main container is-fluid" ]
-        [ div
-            [ class "block" ]
-            (List.concat
-                [ [ a [ class "button is-primary", onClick AddCounter ] [ text "add counter" ] ]
-                , (List.map
-                    (\counter ->
-                        Counter.view counter.counter |> Html.map (CounterMsg counter.id)
-                    )
-                    model.counters
-                  )
-                ]
-            )
-        ]
+    section [ class "section" ]
+        (List.concat
+            [ [ a [ class "button is-primary", onClick AddCounter ] [ text "add counter" ] ]
+            , (List.map
+                (\counter ->
+                    Counter.view counter.counter |> Html.map (CounterMsg counter.id)
+                )
+                model.counters
+              )
+            ]
+        )
