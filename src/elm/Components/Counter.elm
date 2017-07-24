@@ -8,8 +8,12 @@ import Html.Events exposing (onClick)
 type alias Model =
     Int
 
+
 init : Int -> Model
-init n = n
+init n =
+    n
+
+
 
 -- UPDATE
 
@@ -39,11 +43,9 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
-    div [ class "main container is-fluid" ]
-        [ div
-            [ class "block" ]
-            [ a [ class "button", onClick Decrement ] [ text "-" ]
-            , span [ class "tag is-primary is-medium" ] [ text <| toString model ]
-            , a [ class "button", onClick Increment ] [ text "+" ]
-            ]
+    div
+        [ class "block" ]
+        [ a [ class "button", onClick Decrement ] [ text "-" ]
+        , span [ class "tag is-primary is-medium" ] [ text <| toString model ]
+        , a [ class "button", onClick Increment ] [ text "+" ]
         ]

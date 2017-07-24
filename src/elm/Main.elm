@@ -41,6 +41,7 @@ model =
 type Msg
     = NoOp
     | AddCounter
+    | RemoveCounter Int
     | CounterMsg Int Counter.Msg
 
 
@@ -55,6 +56,9 @@ update msg model =
                 | counters = (CounterWithId model.nextId <| Counter.init 0) :: model.counters
                 , nextId = model.nextId + 1
             }
+
+        RemoveCounter counterId ->
+            { model | counters = List.filter (\c -> c.id /= counterId) model.counters }
 
         CounterMsg counterId msg ->
             let
@@ -78,7 +82,11 @@ view model =
             [ [ a [ class "button is-primary", onClick AddCounter ] [ text "add counter" ] ]
             , (List.map
                 (\counter ->
-                    Counter.view counter.counter |> Html.map (CounterMsg counter.id)
+                    div
+                        [ class "block" ]
+                        [ Counter.view counter.counter |> Html.map (CounterMsg counter.id)
+                        , a [ class "button is-danger", onClick (RemoveCounter counter.id) ] [ text "remove" ]
+                        ]
                 )
                 model.counters
               )
