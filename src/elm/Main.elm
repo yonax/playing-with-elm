@@ -3,7 +3,7 @@ module Main exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
-import Components.Counter as Counter
+import Components.Task as Task
 
 
 main : Program Never Model Msg
@@ -15,22 +15,14 @@ main =
 -- MODEL
 
 
-type alias CounterWithId =
-    { id : Int
-    , counter : Counter.Model
-    }
-
-
 type alias Model =
-    { counters : List CounterWithId
-    , nextId : Int
+    { entries : List Task.Model
     }
 
 
 model : Model
 model =
-    { counters = [ CounterWithId 0 <| Counter.init 0 ]
-    , nextId = 1
+    { entries = [ Task.init "Hello", Task.init "Hello 2" ]
     }
 
 
@@ -40,9 +32,7 @@ model =
 
 type Msg
     = NoOp
-    | AddCounter
-    | RemoveCounter Int
-    | CounterMsg Int Counter.Msg
+    | TaskMsg Int Task.Msg
 
 
 update : Msg -> Model -> Model
@@ -51,24 +41,15 @@ update msg model =
         NoOp ->
             model
 
-        AddCounter ->
-            { model
-                | counters = (CounterWithId model.nextId <| Counter.init 0) :: model.counters
-                , nextId = model.nextId + 1
-            }
-
-        RemoveCounter counterId ->
-            { model | counters = List.filter (\c -> c.id /= counterId) model.counters }
-
-        CounterMsg counterId msg ->
+        TaskMsg index msg ->
             let
-                update counter =
-                    if counter.id == counterId then
-                        { counter | counter = Counter.update msg counter.counter }
+                update msg i taskModel =
+                    if index == i then
+                        Task.update msg taskModel
                     else
-                        counter
+                        taskModel
             in
-                { model | counters = List.map update model.counters }
+                { model | entries = List.indexedMap (update msg) model.entries }
 
 
 
@@ -77,18 +58,6 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
-    section [ class "section" ]
-        (List.concat
-            [ [ a [ class "button is-primary", onClick AddCounter ] [ text "add counter" ] ]
-            , (List.map
-                (\counter ->
-                    div
-                        [ class "block" ]
-                        [ Counter.view counter.counter |> Html.map (CounterMsg counter.id)
-                        , a [ class "button is-danger", onClick (RemoveCounter counter.id) ] [ text "remove" ]
-                        ]
-                )
-                model.counters
-              )
-            ]
-        )
+    section
+        [ class "section" ]
+        (List.indexedMap (\index t -> Task.view t |> Html.map (TaskMsg index)) model.entries)

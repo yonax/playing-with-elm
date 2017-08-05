@@ -104,6 +104,9 @@ if (isProd === true) {
           fallback: 'style-loader',
           use: ['css-loader', 'postcss-loader', 'sass-loader']
         })
+      }, {
+        test: /\.sass$/,
+        use: ['style-loader', 'css-loader', 'postcss-loader', 'sass-loader']
       }]
     },
     plugins: [
