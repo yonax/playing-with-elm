@@ -18,10 +18,11 @@ decoder =
         (field "text" string)
         (field "completed" bool)
 
+
 encode : Todo -> Encode.Value
-encode todo = 
-  Encode.object
-    [ ("id", Encode.int todo.id)
-    , ("text", Encode.string todo.text)
-    , ("completed", Encode.bool todo.completed)
-    ]
+encode todo =
+    Encode.object
+        [ ( "id", Encode.int todo.id )
+        , ( "text", Encode.string todo.text )
+        , ( "completed", Encode.bool todo.completed )
+        ]

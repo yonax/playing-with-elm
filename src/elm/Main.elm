@@ -71,31 +71,36 @@ update msg model =
 
         TodosLoaded (Err error) ->
             ( { model | error = Just error }, Cmd.none )
-        
+
         CheckTodo todoId value ->
-            let 
-                checkTodo = TodoRequest.check todoId value
+            let
+                checkTodo =
+                    TodoRequest.check todoId value
             in
-                ( model, Http.send CheckCompleted checkTodo)
-        
-        CheckCompleted (Ok newTodo) -> 
-            let 
-                updateTodo todo = 
+                ( model, Http.send CheckCompleted checkTodo )
+
+        CheckCompleted (Ok newTodo) ->
+            let
+                updateTodo todo =
                     if todo.id == newTodo.id then
                         newTodo
                     else
                         todo
-            in 
-                ({ model | entries = List.map updateTodo model.entries }, Cmd.none)
-        
-        CheckCompleted (Err error) -> 
+            in
+                ( { model | entries = List.map updateTodo model.entries }, Cmd.none )
+
+        CheckCompleted (Err error) ->
             ( { model | error = Just error }, Cmd.none )
+
+
 
 -- VIEW
 
+
 todoView : Todo -> Html Msg
-todoView todo = 
+todoView todo =
     TodoView.view (CheckTodo todo.id) todo
+
 
 view : Model -> Html Msg
 view model =
