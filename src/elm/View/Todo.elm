@@ -6,12 +6,12 @@ import Html.Events exposing (..)
 import Data.Todo exposing (Todo)
 
 
-view : Todo -> Html msg
-view todo =
+view : (Bool -> msg) -> Todo -> Html msg
+view checkTodo todo =
     div [ class "level" ]
         [ div [ class "level-left" ]
             [ div [ class "level-item" ]
-                [ input [ type_ "checkbox", checked todo.completed ]
+                [ input [ type_ "checkbox", checked todo.completed, onCheck checkTodo ]
                     []
                 ]
             , div [ class "level-item" ]
