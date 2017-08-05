@@ -1,10 +1,11 @@
 module Main exposing (..)
 
-import Html exposing (..)
-import Html.Attributes exposing (..)
+import Html exposing (Html, section, div, text)
+import Html.Attributes exposing (class)
 import Http
-import Json.Decode as Decode
-import Components.Task as Task
+import Data.Todo exposing (Todo)
+import Request.Todo as TodoRequest
+import View.Todo as TodoView
 
 
 main : Program Never Model Msg
@@ -16,30 +17,9 @@ main =
 -- Load data
 
 
-type alias Tasks =
-    List Task.Model
-
-
-getTasks : Http.Request Tasks
-getTasks =
-    Http.get "http://localhost:3000/tasks" decodeTasks
-
-
-decodeTasks : Decode.Decoder Tasks
-decodeTasks =
-    Decode.list decodeTask
-
-
-decodeTask : Decode.Decoder Task.Model
-decodeTask =
-    Decode.map2 Task.Model
-        (Decode.field "title" Decode.string)
-        (Decode.field "completed" Decode.bool)
-
-
-loadTasks : Cmd Msg
-loadTasks =
-    Http.send TasksLoaded getTasks
+loadTodos : Cmd Msg
+loadTodos =
+    Http.send TodosLoaded TodoRequest.list
 
 
 
@@ -48,7 +28,7 @@ loadTasks =
 
 init : ( Model, Cmd Msg )
 init =
-    ( model, loadTasks )
+    ( model, loadTodos )
 
 
 subscriptions : Model -> Sub Msg
@@ -57,7 +37,7 @@ subscriptions model =
 
 
 type alias Model =
-    { entries : List Task.Model
+    { entries : List Todo
     , error : Maybe Http.Error
     }
 
@@ -75,8 +55,7 @@ model =
 
 type Msg
     = NoOp
-    | TasksLoaded (Result Http.Error Tasks)
-    | TaskMsg Int Task.Msg
+    | TodosLoaded (Result Http.Error (List Todo))
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -85,31 +64,21 @@ update msg model =
         NoOp ->
             ( model, Cmd.none )
 
-        TasksLoaded (Ok tasks) ->
+        TodosLoaded (Ok tasks) ->
             ( { model | entries = tasks, error = Nothing }, Cmd.none )
 
-        TasksLoaded (Err error) ->
+        TodosLoaded (Err error) ->
             ( { model | error = Just error }, Cmd.none )
-
-        TaskMsg index msg ->
-            let
-                update msg i taskModel =
-                    if index == i then
-                        Task.update msg taskModel
-                    else
-                        taskModel
-            in
-                ( { model | entries = List.indexedMap (update msg) model.entries }, Cmd.none )
 
 
 
 -- VIEW
 
 
-view : Model -> Html Msg
+view : Model -> Html msg
 view model =
     section
         [ class "section" ]
         ([ div [] [ text <| toString model.error ] ]
-            ++ (List.indexedMap (\index t -> Task.view t |> Html.map (TaskMsg index)) model.entries)
+            ++ (List.map TodoView.view model.entries)
         )
